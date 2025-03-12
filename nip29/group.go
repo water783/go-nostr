@@ -3,6 +3,7 @@ package nip29
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/nbd-wtf/go-nostr"
@@ -37,12 +38,14 @@ func ParseGroupAddress(raw string) (GroupAddress, error) {
 type Group struct {
 	Address GroupAddress
 
-	Name    string
-	Picture string
-	About   string
-	Members map[string]*Role
-	Private bool
-	Closed  bool
+	Name       string
+	Picture    string
+	About      string
+	Members    map[string]*Role
+	Private    bool
+	Closed     bool
+	Level      int
+	LevelUntil nostr.Timestamp
 
 	LastMetadataUpdate nostr.Timestamp
 	LastAdminsUpdate   nostr.Timestamp
@@ -83,6 +86,8 @@ func (group Group) ToMetadataEvent() *nostr.Event {
 		CreatedAt: group.LastMetadataUpdate,
 		Tags: nostr.Tags{
 			nostr.Tag{"d", group.Address.ID},
+			nostr.Tag{"level", strconv.Itoa(group.Level)},
+			nostr.Tag{"levelUntil", strconv.FormatInt(int64(group.LevelUntil), 10)},
 		},
 	}
 	if group.Name != "" {

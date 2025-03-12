@@ -22,6 +22,7 @@ const (
 	PermRemovePermission  Permission = "remove-permission"
 	PermEditGroupStatus   Permission = "edit-group-status"
 	PermDeleteGroupStatus Permission = "delete-group-status"
+	PermCreateInvite      Permission = "create-invite"
 )
 
 type KindRange []int
@@ -36,6 +37,8 @@ var ModerationEventKinds = KindRange{
 	nostr.KindSimpleGroupEditGroupStatus,
 	nostr.KindSimpleGroupCreateGroup,
 	nostr.KindSimpleGroupDeleteGroup,
+	nostr.KindSimpleGroupCreateInvite,
+	nostr.KindSimpleGroupEditLevel,
 }
 
 var MetadataEventKinds = KindRange{
@@ -61,5 +64,6 @@ var (
 		PermAddPermission:    {},
 		PermRemovePermission: {},
 		PermEditGroupStatus:  {},
+		PermCreateInvite:     {},
 	}
 )
