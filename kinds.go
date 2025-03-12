@@ -56,6 +56,7 @@ const (
 	KindSimpleGroupCreateGroup   int = 9007
 	KindSimpleGroupDeleteGroup   int = 9008
 	KindSimpleGroupCreateInvite  int = 9009
+	KindSimpleGroupEditLevel     int = 9010
 	KindSimpleGroupJoinRequest   int = 9021
 	KindSimpleGroupLeaveRequest  int = 9022
 	KindZapGoal                  int = 9041

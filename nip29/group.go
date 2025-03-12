@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/nbd-wtf/go-nostr"
@@ -38,12 +39,14 @@ func ParseGroupAddress(raw string) (GroupAddress, error) {
 type Group struct {
 	Address GroupAddress
 
-	Name    string
-	Picture string
-	About   string
-	Members map[string][]*Role
-	Private bool
-	Closed  bool
+	Name       string
+	Picture    string
+	About      string
+	Members    map[string][]*Role
+	Private    bool
+	Closed     bool
+	Level      int
+	LevelUntil nostr.Timestamp
 
 	Roles []*Role
 
@@ -82,7 +85,7 @@ func (group Group) String() string {
 		i++
 	}
 
-	return fmt.Sprintf(`<Group %s name="%s"%s%s picture="%s" about="%s" members=[%v]>`,
+	return fmt.Sprintf(`<Group %s name="%s"%s%s picture="%s" about="%s" members=[%v] level=[%d] levelUntil=[%d]>`,
 		group.Address,
 		group.Name,
 		maybePrivate,
@@ -90,6 +93,8 @@ func (group Group) String() string {
 		group.Picture,
 		group.About,
 		strings.Join(members, " "),
+		group.Level,
+		group.LevelUntil,
 	)
 }
 
@@ -127,6 +132,8 @@ func (group Group) ToMetadataEvent() *nostr.Event {
 		CreatedAt: group.LastMetadataUpdate,
 		Tags: nostr.Tags{
 			nostr.Tag{"d", group.Address.ID},
+			nostr.Tag{"level", strconv.Itoa(group.Level)},
+			nostr.Tag{"levelUntil", strconv.FormatInt(int64(group.LevelUntil), 10)},
 		},
 	}
 	if group.Name != "" {

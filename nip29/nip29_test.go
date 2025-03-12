@@ -17,11 +17,15 @@ func TestGroupEventBackAndForth(t *testing.T) {
 	group1, _ := NewGroup("relay.com'xyz")
 	group1.Name = "banana"
 	group1.Private = true
+	group1.Level = 0
+	group1.LevelUntil = 1741750090
 	meta1 := group1.ToMetadataEvent()
 
 	require.Equal(t, "xyz", meta1.Tags.GetD(), "translation of group1 to metadata event failed: %s", meta1)
 	require.NotNil(t, meta1.Tags.GetFirst([]string{"name", "banana"}), "translation of group1 to metadata event failed: %s", meta1)
 	require.NotNil(t, meta1.Tags.GetFirst([]string{"private"}), "translation of group1 to metadata event failed: %s", meta1)
+	require.NotNil(t, meta1.Tags.GetFirst([]string{"level", "0"}), "translation of group1 to metadata event failed: %s", meta1)
+	require.NotNil(t, meta1.Tags.GetFirst([]string{"levelUntil", "1741750090"}), "translation of group1 to metadata event failed: %s", meta1)
 
 	group2, _ := NewGroup("groups.com'abc")
 	group2.Members[ALICE] = []*Role{{Name: "nada"}}
