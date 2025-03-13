@@ -2,8 +2,6 @@ package nip29
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -18,43 +16,46 @@ func TestGroupEventBackAndForth(t *testing.T) {
 	group1.Name = "banana"
 	group1.Private = true
 	meta1 := group1.ToMetadataEvent()
-
-	require.Equal(t, "xyz", meta1.Tags.GetD(), "translation of group1 to metadata event failed: %s", meta1)
-	require.NotNil(t, meta1.Tags.GetFirst([]string{"name", "banana"}), "translation of group1 to metadata event failed: %s", meta1)
-	require.NotNil(t, meta1.Tags.GetFirst([]string{"private"}), "translation of group1 to metadata event failed: %s", meta1)
+	if meta1.Tags.GetD() != "xyz" ||
+		meta1.Tags.GetFirst([]string{"name", "banana"}) == nil ||
+		meta1.Tags.GetFirst([]string{"private"}) == nil {
+		t.Fatalf("translation of group1 to metadata event failed: %s", meta1)
+	}
 
 	group2, _ := NewGroup("groups.com'abc")
-	group2.Members[ALICE] = []*Role{{Name: "nada"}}
-	group2.Members[BOB] = []*Role{{Name: "nada"}}
-	group2.Members[CAROL] = nil
-	group2.Members[DEREK] = nil
+	group2.Members[ALICE] = &Role{Name: "nada", Permissions: map[Permission]struct{}{PermAddUser: {}}}
+	group2.Members[BOB] = &Role{Name: "nada", Permissions: map[Permission]struct{}{PermEditMetadata: {}}}
+	group2.Members[CAROL] = EmptyRole
+	group2.Members[DEREK] = EmptyRole
 	admins2 := group2.ToAdminsEvent()
-
-	require.Equal(t, "abc", admins2.Tags.GetD(), "translation of group2 to admins event failed")
-	require.Equal(t, 3, len(admins2.Tags), "translation of group2 to admins event failed")
-	require.NotNil(t, admins2.Tags.GetFirst([]string{"p", ALICE, "nada"}), "translation of group2 to admins event failed")
-	require.NotNil(t, admins2.Tags.GetFirst([]string{"p", BOB, "nada"}), "translation of group2 to admins event failed")
+	if admins2.Tags.GetD() != "abc" ||
+		len(admins2.Tags) != 3 ||
+		admins2.Tags.GetFirst([]string{"p", ALICE, "nada", "add-user"}) == nil ||
+		admins2.Tags.GetFirst([]string{"p", BOB, "nada", "edit-metadata"}) == nil {
+		t.Fatalf("translation of group2 to admins event failed")
+	}
 
 	members2 := group2.ToMembersEvent()
-	require.Equal(t, "abc", members2.Tags.GetD(), "translation of group2 to members2 event failed")
-	require.Equal(t, 5, len(members2.Tags), "translation of group2 to members2 event failed")
-	require.NotNil(t, members2.Tags.GetFirst([]string{"p", ALICE}), "translation of group2 to members2 event failed")
-	require.NotNil(t, members2.Tags.GetFirst([]string{"p", BOB}), "translation of group2 to members2 event failed")
-	require.NotNil(t, members2.Tags.GetFirst([]string{"p", CAROL}), "translation of group2 to members2 event failed")
-	require.NotNil(t, members2.Tags.GetFirst([]string{"p", DEREK}), "translation of group2 to members2 event failed")
+	if members2.Tags.GetD() != "abc" ||
+		len(members2.Tags) != 5 ||
+		members2.Tags.GetFirst([]string{"p", ALICE}) == nil ||
+		members2.Tags.GetFirst([]string{"p", BOB}) == nil ||
+		members2.Tags.GetFirst([]string{"p", CAROL}) == nil ||
+		members2.Tags.GetFirst([]string{"p", DEREK}) == nil {
+		t.Fatalf("translation of group2 to members2 event failed")
+	}
 
 	group1.MergeInMembersEvent(members2)
-	require.Equal(t, 4, len(group1.Members), "merge of members2 into group1 failed")
-	require.Len(t, group1.Members[ALICE], 0, "merge of members2 into group1 failed")
-	require.Len(t, group1.Members[DEREK], 0, "merge of members2 into group1 failed")
-
+	if len(group1.Members) != 4 || group1.Members[ALICE] != EmptyRole || group1.Members[DEREK] != EmptyRole {
+		t.Fatalf("merge of members2 into group1 failed")
+	}
 	group1.MergeInAdminsEvent(admins2)
-	require.Equal(t, 4, len(group1.Members), "merge of admins2 into group1 failed")
-
-	require.Equal(t, "nada", group1.Members[ALICE][0].Name, "merge of admins2 into group1 failed")
-	require.Len(t, group1.Members[DEREK], 0, "merge of admins2 into group1 failed")
+	if len(group1.Members) != 4 || group1.Members[ALICE].Name != "nada" || group1.Members[DEREK] != EmptyRole {
+		t.Fatalf("merge of admins2 into group1 failed")
+	}
 
 	group2.MergeInMetadataEvent(meta1)
-	require.Equal(t, "banana", group2.Name, "merge of meta1 into group2 failed")
-	require.Equal(t, "abc", group2.Address.ID, "merge of meta1 into group2 failed")
+	if group2.Name != "banana" || group2.Address.ID != "abc" {
+		t.Fatalf("merge of meta1 into group2 failed")
+	}
 }
