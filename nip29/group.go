@@ -38,14 +38,16 @@ func ParseGroupAddress(raw string) (GroupAddress, error) {
 type Group struct {
 	Address GroupAddress
 
-	Name       string
-	Picture    string
-	About      string
-	Members    map[string]*Role
-	Private    bool
-	Closed     bool
-	Level      int
-	LevelUntil nostr.Timestamp
+	Name            string
+	Picture         string
+	About           string
+	Members         map[string]*Role
+	Private         bool
+	Closed          bool
+	Level           int
+	LevelUntil      nostr.Timestamp
+	InviteCode      string
+	InviteCodeUntil nostr.Timestamp
 
 	LastMetadataUpdate nostr.Timestamp
 	LastAdminsUpdate   nostr.Timestamp

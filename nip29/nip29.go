@@ -22,6 +22,7 @@ const (
 	PermRemovePermission  Permission = "remove-permission"
 	PermEditGroupStatus   Permission = "edit-group-status"
 	PermDeleteGroupStatus Permission = "delete-group-status"
+	PermEditLevel         Permission = "edit-level"
 	PermCreateInvite      Permission = "create-invite"
 )
 
